@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Morpheus Avocats | François Vannesson</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #000000;
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.5);
+            --accent: #3b82f6; /* Bleu Moderne */
+            --accent-glow: rgba(59, 130, 246, 0.3);
+            --font-serif: 'EB Garamond', serif;
+            --font-sans: 'Space Grotesk', sans-serif;
+            --border-white: rgba(255, 255, 255, 0.1);
+            --card-bg: rgba(8, 8, 8, 0.8);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- BACKGROUND SCROLL-DRIVEN PARALLAX --- */
+        .viewport-bg {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at var(--light-x, 20%) var(--light-y, 0%), rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, #050505 0%, var(--bg-deep) 100%);
+            animation: move-light linear forwards;
+            animation-timeline: scroll(root);
+        }
+
+        @keyframes move-light {
+            from { --light-y: 0%; --light-x: 20%; }
+            to { --light-y: 100%; --light-x: 80%; }
+        }
+
+        @property --light-x { syntax: '<percentage>'; inherits: false; initial-value: 20%; }
+        @property --light-y { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+
+        /* --- PROGRESS BAR --- */
+        #scroll-progress {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: var(--accent);
+            transform-origin: 0% 50%;
+            z-index: 1000;
+            animation: progress-grow linear forwards;
+            animation-timeline: scroll(root);
+        }
+        @keyframes progress-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+        /* --- NAVIGATION --- */
+        nav {
+            position: fixed;
+            top: 0; width: 100%;
+            padding: 1.5rem 6vw;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-white);
+        }
+
+        .nav-logo { font-weight: 700; letter-spacing: 0.1rem; text-transform: uppercase; font-size: 0.8rem; color: var(--accent); }
+
+        /* --- HERO --- */
+        header {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 0 10vw;
+            animation: hero-parallax linear forwards;
+            animation-timeline: scroll(root);
+            animation-range: 0vh 100vh;
+        }
+
+        @keyframes hero-parallax {
+            to { transform: translateY(150px); opacity: 0; filter: blur(20px); }
+        }
+
+        h1 {
+            font-size: clamp(3.5rem, 10vw, 9rem);
+            font-weight: 600;
+            letter-spacing: -0.04em;
+            line-height: 0.85;
+            margin-bottom: 2rem;
+            background: linear-gradient(to bottom, #fff 60%, rgba(255,255,255,0.2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-desc {
+            font-family: var(--font-sans);
+            font-weight: 300;
+            font-size: clamp(1.1rem, 2vw, 1.8rem);
+            color: var(--text-secondary);
+            max-width: 800px;
+            line-height: 1.4;
+        }
+
+        /* --- BENTO GRID SYSTEM --- */
+        .grid-section {
+            padding: 10vh 6vw;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .section-header {
+            grid-column: span 12;
+            padding: 4rem 0;
+            border-bottom: 1px solid var(--border-white);
+            margin-bottom: 2rem;
+        }
+
+        .section-header h2 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .section-header p {
+            font-family: var(--font-sans);
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            max-width: 900px;
+            line-height: 1.2;
+            font-weight: 500;
+        }
+
+        .bento-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-white);
+            border-radius: 24px;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+            overflow: hidden;
+            
+            animation: reveal-in-view linear forwards;
+            animation-timeline: view();
+            animation-range: entry 0% cover 30%;
+        }
+
+        .bento-card:hover { 
+            border-color: var(--accent); 
+            background: rgba(59, 130, 246, 0.03);
+            transform: translateY(-5px);
+        }
+
+        @keyframes reveal-in-view {
+            from { opacity: 0; transform: translateY(60px); filter: blur(10px); }
+            to { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+
+        .span-4 { grid-column: span 4; }
+        .span-6 { grid-column: span 6; }
+        .span-8 { grid-column: span 8; }
+        .span-12 { grid-column: span 12; }
+
+        .tag { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.15rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; display: block; }
+        h3 { font-size: 1.8rem; font-weight: 600; margin-bottom: 1rem; letter-spacing: -0.02em; }
+        ul { list-style: none; margin-top: 1.5rem; }
+        li { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.6rem; display: flex; align-items: center; }
+        li::before { content: ""; width: 6px; height: 1px; background: var(--accent); margin-right: 1rem; }
+        
+        p { color: var(--text-secondary); font-size: 1rem; line-height: 1.6; }
+
+        /* --- HONORAIRES SECTION --- */
+        .fees-section { 
+            position: relative; 
+            padding: 15vh 0; 
+            background: #000;
+            overflow: clip; 
+        }
+
+        .fees-parallax-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+        }
+
+        .fees-parallax-title {
+            font-family: var(--font-sans);
+            font-size: clamp(6rem, 20vw, 20rem);
+            font-weight: 800;
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(59, 130, 246, 0.1);
+            white-space: nowrap;
+            letter-spacing: -0.05em;
+            text-transform: uppercase;
+            
+            animation: title-parallax linear forwards;
+            animation-timeline: view();
+            animation-range: entry 0% exit 100%;
+        }
+
+        @keyframes title-parallax {
+            from { transform: translateY(-100px); opacity: 0; }
+            50% { opacity: 0.3; }
+            to { transform: translateY(300px); opacity: 0; }
+        }
+
+        .fees-container {
+            position: relative;
+            z-index: 5;
+            padding: 0 6vw;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .fee-card {
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--border-white);
+            border-radius: 24px;
+            padding: 3.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .fee-card.left { animation: slide-left linear forwards; animation-timeline: view(); animation-range: entry 0% cover 35%; }
+        .fee-card.right { animation: slide-right linear forwards; animation-timeline: view(); animation-range: entry 0% cover 35%; }
+
+        @keyframes slide-left { from { transform: translateX(-100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slide-right { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* CITATIONS STATEMENTS */
+        .justice-statement, .merchandise-statement {
+            animation: statement-reveal linear forwards;
+            animation-timeline: view();
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .justice-statement { animation-range: entry 10% cover 40%; }
+        .merchandise-statement { animation-range: entry 5% cover 30%; }
+
+        @keyframes statement-reveal {
+            to { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+
+        .table-luxe {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            font-size: 0.85rem;
+        }
+        .table-luxe th { text-align: left; color: var(--accent); text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-white); }
+        .table-luxe td { padding: 1.2rem 0; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text-secondary); }
+        .table-luxe tr:hover td { color: #fff; }
+
+        .price-highlight { font-weight: 700; font-size: 3.5rem; color: #fff; margin: 1rem 0; display: block; letter-spacing: -0.04em; }
+
+        /* --- QUOTE BLOCK --- */
+        .quote-block { grid-column: span 12; padding: 10vh 0; text-align: center; z-index: 10; }
+        
+        /* --- CTA --- */
+        .cta-section { padding: 20vh 6vw; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .cta-title {
+            font-weight: 700;
+            font-size: clamp(4rem, 15vw, 12rem);
+            line-height: 0.8;
+            margin-bottom: 4rem;
+            letter-spacing: -0.06em;
+            background: linear-gradient(90deg, #fff, var(--accent), #fff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 6s linear infinite;
+        }
+        @keyframes shine { to { background-position: 200% center; } }
+
+        .btn-luxe {
+            background: var(--accent); color: #fff; padding: 1.5rem 5rem; border-radius: 8px; text-decoration: none;
+            font-weight: 600; text-transform: uppercase; letter-spacing: 0.2rem; font-size: 0.75rem; transition: 0.4s;
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
+        }
+        .btn-luxe:hover { transform: scale(1.05); box-shadow: 0 15px 40px rgba(59, 130, 246, 0.4); }
+
+        footer {
+            padding: 5rem 6vw; border-top: 1px solid var(--border-white);
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 4rem; background: #000;
+        }
+
+        .footer-col h4 { font-size: 0.7rem; color: var(--accent); text-transform: uppercase; margin-bottom: 1.5rem; letter-spacing: 0.15rem; }
+        .footer-col p { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.8; }
+
+        @media (max-width: 1024px) {
+            .span-4, .span-6, .span-8 { grid-column: span 12; }
+            .fees-container { grid-template-columns: 1fr; }
+            footer { grid-template-columns: 1fr; gap: 3rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="scroll-progress"></div>
+    <div class="viewport-bg"></div>
+
+    <nav>
+        <div class="nav-logo">Morpheus Avocats</div>
+        <div style="font-size: 0.65rem; font-weight: 500; color: var(--text-secondary); letter-spacing: 0.05rem;">F. VANNESSON — BARREAU 92</div>
+    </nav>
+
+    <header>
+        <h1>L'Architecture<br>du Droit.</h1>
+        <p class="hero-desc">François Vannesson accompagne les dirigeants, startups et institutions dans la résolution de leurs enjeux les plus critiques avec une approche transversale.</p>
+    </header>
+
+    <div class="grid-section">
+        <div class="section-header">
+            <h2>Expertise Transversale</h2>
+            <p>Le droit n’est pas une succession de silos. Il est un tissu de cohérences et d'articulations.</p>
+        </div>
+
+        <div class="bento-card span-8">
+            <div>
+                <span class="tag">Expertise Maîtresse</span>
+                <h3>Assurances & Protection sociale</h3>
+                <p>Une expertise née du terrain, nourrie par l’analyse, exercée avec discernement.</p>
+            </div>
+            <ul>
+                <li>Sinistres & contentieux techniques</li>
+                <li>Distribution et conformité (DDA, RGPD, ACPR)</li>
+                <li>Réassurance, gouvernance, audit réglementaire</li>
+            </ul>
+        </div>
+
+        <div class="bento-card span-4">
+            <div>
+                <span class="tag">Stratégie</span>
+                <h3>Droit des affaires</h3>
+                <p>Un droit de structure, de contrat, de cohérence. Pas de paperasse.</p>
+            </div>
+            <ul>
+                <li>Création & Statuts</li>
+                <li>Gouvernance complexe</li>
+                <li>Levées de fonds</li>
+            </ul>
+        </div>
+
+        <div class="bento-card span-4">
+            <div>
+                <span class="tag">Défense</span>
+                <h3>Pénal des affaires</h3>
+                <p>Un mot mal pesé... et tout peut basculer.</p>
+            </div>
+            <ul>
+                <li>Défense des dirigeants</li>
+                <li>Abus de biens sociaux</li>
+                <li>Contentieux AMF & CNIL</li>
+            </ul>
+        </div>
+
+        <div class="bento-card span-8">
+            <div>
+                <span class="tag">Scale-up</span>
+                <h3>Innovation & VC</h3>
+                <p>Une clause mal rédigée peut tuer une startup.</p>
+            </div>
+            <ul>
+                <li>Pactes d'associés & Exit</li>
+                <li>Structuration de projets innovants</li>
+                <li>Conformité technologique</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- SECTION HONORAIRES -->
+    <section class="fees-section">
+        <div class="fees-parallax-bg">
+            <div class="fees-parallax-title">HONORAIRES</div>
+        </div>
+        
+        <div class="fees-container">
+            <div class="fee-card span-12" style="background: transparent; border: none; text-align: center; margin-bottom: 5rem; padding: 0;">
+                <span class="tag">Transparence Absolue</span>
+                <h2 style="font-size: clamp(2rem, 5vw, 4rem); line-height: 1; margin-bottom: 2rem; font-weight: 600;">Une facture loyale,<br>une parole claire.</h2>
+                
+                <div class="justice-statement">
+                    <p style="max-width: 850px; margin: 0 auto; font-size: 1.3rem; color: var(--text-primary); font-family: var(--font-sans); font-weight: 400; letter-spacing: -0.01em;">
+                        "J’adapte mes honoraires à la situation financière du client. Pas par charité. <span style="color: var(--accent); font-weight: 700;">Par justice.</span>"
+                    </p>
+                    <div style="width: 30px; height: 2px; background: var(--accent); margin: 2rem auto;"></div>
+                </div>
+            </div>
+
+            <!-- Modalités -->
+            <div class="fee-card span-4 left">
+                <span class="tag">Option 01</span>
+                <h3>Le Forfait</h3>
+                <p>Pour un périmètre clair et prévisible. Tranquillité d'esprit partagée.</p>
+                <ul>
+                    <li>Rédaction de contrats</li>
+                    <li>Création de société</li>
+                    <li>Négociation de départ</li>
+                </ul>
+            </div>
+
+            <div class="fee-card span-4" style="transform: translateY(-20px); border-color: var(--accent); box-shadow: 0 20px 50px rgba(59, 130, 246, 0.1);">
+                <span class="tag" style="background: var(--accent); color: #fff; padding: 2px 10px; display: inline-block; border-radius: 4px;">Référence</span>
+                <h3>Taux Horaire</h3>
+                <p>Pour les missions évolutives ou les contentieux complexes.</p>
+                <span class="price-highlight">180€ — 500€ <small style="font-size: 0.9rem; font-weight: 400; opacity: 0.5;">HT/H</small></span>
+                <p style="font-size: 0.8rem; font-weight: 500; color: var(--accent);">Ajusté selon les moyens du client.</p>
+            </div>
+
+            <div class="fee-card span-4 right">
+                <span class="tag">Option 02</span>
+                <h3>Le Résultat</h3>
+                <p>Un complément basé sur le succès obtenu. Engagement total.</p>
+                <p style="margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-secondary);">Couplé à un fixe modéré, pour une transparence totale.</p>
+            </div>
+
+            <!-- Barèmes -->
+            <div class="fee-card span-12" style="margin-top: 2rem;">
+                <span class="tag">Cadre Légal</span>
+                <h3>Saisies immobilières & Licitation</h3>
+                <p>Émoluments fixés selon les barèmes du Code de Commerce.</p>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 4rem; margin-top: 3rem;">
+                    <div>
+                        <h4 style="color: var(--accent); margin-bottom: 1rem; text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.1rem;">Adjudication</h4>
+                        <table class="table-luxe">
+                            <thead><tr><th>Tranche</th><th>Taux</th></tr></thead>
+                            <tbody>
+                                <tr><td>0 à 6 500 €</td><td>7,397 %</td></tr>
+                                <tr><td>6 500 à 17 000 €</td><td>3,051 %</td></tr>
+                                <tr><td>17 000 à 60 000 €</td><td>2,034 %</td></tr>
+                                <tr><td>> 60 000 €</td><td>1,526 %</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--accent); margin-bottom: 1rem; text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.1rem;">Vente amiable</h4>
+                        <table class="table-luxe">
+                            <thead><tr><th>Tranche</th><th>Taux</th></tr></thead>
+                            <tbody>
+                                <tr><td>Tranche 1</td><td>3,945 %</td></tr>
+                                <tr><td>Tranche 2</td><td>1,627 %</td></tr>
+                                <tr><td>Tranche 3</td><td>1,085 %</td></tr>
+                                <tr><td>> 60 000 €</td><td>0,814 %</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fee-card span-6 left">
+                <span class="tag">Influence</span>
+                <h3>Écriture Publique</h3>
+                <p>Discours, tribunes et lettres sensibles. L'art du verbe.</p>
+                <table class="table-luxe">
+                    <tr><td>Lettre sensible</td><td>Dès 250€ HT</td></tr>
+                    <tr><td>Tribune / Discours</td><td>500€ — 5k€ HT</td></tr>
+                </table>
+            </div>
+
+            <div class="fee-card span-6 right">
+                <span class="tag">Conseil</span>
+                <h3>Orientations</h3>
+                <p>Analyse préliminaire de votre situation juridique.</p>
+                <ul style="margin-top: 1.5rem;">
+                    <li>Consultation < 30min : Gratuite</li>
+                    <li>Orientation stratégique : 150€ — 250€ HT</li>
+                </ul>
+            </div>
+
+            <div class="quote-block">
+                <div class="merchandise-statement">
+                    <p style="font-weight: 500; font-size: clamp(1.5rem, 3.5vw, 3rem); line-height: 1.1; color: #fff; max-width: 900px; margin: 0 auto; letter-spacing: -0.03em;">
+                        "Le droit, à mes yeux, n’est pas une marchandise. Et la confiance ne se monnaye pas à l’horloge."
+                    </p>
+                    <p style="margin-top: 2rem; font-size: 0.7rem; letter-spacing: 0.2rem; color: var(--accent); text-transform: uppercase; font-weight: 700;">
+                        François Vannesson
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="cta-title">Vannesson</div>
+        <a href="mailto:contact@morpheusavocats.fr" class="btn-luxe">Ouvrir un dossier</a>
+    </section>
+
+    <footer>
+        <div class="footer-col">
+            <h4>Le Cabinet</h4>
+            <p>Morpheus Avocats<br>10 rue Jules Ferry<br>92300 Levallois-Perret</p>
+        </div>
+        <div class="footer-col">
+            <h4>Contact</h4>
+            <p>+33 (0)6 74 35 32 99<br>contact@morpheusavocats.fr</p>
+        </div>
+        <div class="footer-col">
+            <h4>Juridique</h4>
+            <p>© 2025 Morpheus Avocats<br>Barreau des Hauts-de-Seine (Toque 785)<br>TVA : FR 45 848 108 812</p>
+        </div>
+    </footer>
+
+</body>
+</html>
